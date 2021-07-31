@@ -1,0 +1,76 @@
+{
+  "Comment": "A state machine that retrieves jokes and stores them in a job table.",
+  "StartAt": "Init Job",
+  "States": {
+    "Init Job": {
+      "Type": "Task",
+      "Resource": "${DDBPutJokesJob}",
+      "Parameters": {
+        "TableName": "${DDBTable}",
+        "Item": {
+          "Id": {
+            "S.$": "$.ref"
+          },
+          "Status": "CREATED"
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "ResultPath": null,
+      "Next": "Retrieve Joke"
+    },
+    "Retrieve Joke": {
+      "Type": "Task",
+      "Resource": "${RetrieveJokeFunctionArn}",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 15,
+          "MaxAttempts": 5,
+          "BackoffRate": 1.5
+        }
+      ],
+      "Next": "Update Job Details"
+    },
+    "Update Job Details": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:putItem",
+      "Parameters": {
+        "TableName": "${DDBTable}",
+        "Item": {
+          "Id": {
+            "S.$": "$.id"
+          },
+          "Text": {
+            "S.$": "$.text"
+          },
+          "Timestamp": {
+            "S.$": "$.timestamp"
+          },
+          "Status": "FINISHED"
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "End": true
+    }
+  }
+}
