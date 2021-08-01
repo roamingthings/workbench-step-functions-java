@@ -8,10 +8,10 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.services.sfn.SfnClient;
 import software.amazon.awssdk.services.sfn.model.StartExecutionRequest;
 
+import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -23,6 +23,9 @@ public class CreateJobController {
 
     private static final Logger log = LoggerFactory.getLogger(CreateJobController.class);
 
+    @Inject
+    SfnClient sfnClient;
+
     @Post("/jobs")
     public HttpResponse<String> createJob(HttpRequest<Void> request) throws URISyntaxException {
         var stateMachineArn = System.getenv("RETRIEVE_JOKE_STATE_MACHINE_ARN");
@@ -30,7 +33,7 @@ public class CreateJobController {
 
         log.info("Starting job {}", referenceNumber);
 
-        startWorkflow(createSfnClient(), stateMachineArn, referenceNumber);
+        startWorkflow(stateMachineArn, referenceNumber);
 
         if (request instanceof MicronautAwsProxyRequest) {
             var awsRequest = (MicronautAwsProxyRequest<Void>) request;
@@ -41,17 +44,11 @@ public class CreateJobController {
         }
     }
 
-    private SfnClient createSfnClient() {
-        return SfnClient.builder()
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                .build();
-    }
-
     private static String createJobReferenceJson(String referenceNumber) {
         return "{ \"ref\": \"" + referenceNumber + "\" }";
     }
 
-    public static void startWorkflow(SfnClient sfnClient, String stateMachineArn, String referenceNumber) {
+    public void startWorkflow(String stateMachineArn, String referenceNumber) {
         var executionRequest = StartExecutionRequest.builder()
                 .input(createJobReferenceJson(referenceNumber))
                 .stateMachineArn(stateMachineArn)
