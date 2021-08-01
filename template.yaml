@@ -39,6 +39,7 @@ Resources:
       Environment:
         Variables:
           RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
+          MICRONAUT_ENVIRONMENTS: aws,function
       Policies:
         - StepFunctionsExecutionPolicy:
             StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
@@ -56,6 +57,9 @@ Resources:
       Handler: de.roamingthings.jokes.fn.retrieve.RetrieveJokeHandler
       Description: Retrieve a Joke from the external JokeAPI
       MemorySize: 384
+      Environment:
+        Variables:
+          MICRONAUT_ENVIRONMENTS: aws,function
 
   JobStatusFunction:
     Type: AWS::Serverless::Function
@@ -66,6 +70,7 @@ Resources:
       Environment:
         Variables:
           JOB_TABLE: !Ref JokesJobTable
+          MICRONAUT_ENVIRONMENTS: aws,function
       Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
         - DynamoDBReadPolicy:
             TableName: !Ref JokesJobTable
