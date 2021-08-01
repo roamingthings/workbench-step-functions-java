@@ -24,12 +24,15 @@ public class CreateJobController {
     private static final Logger log = LoggerFactory.getLogger(CreateJobController.class);
 
     @Inject
-    SfnClient sfnClient;
+    private SfnClient sfnClient;
+
+    @Inject
+    private ReferenceNumberGenerator referenceNumberGenerator;
 
     @Post("/jobs")
-    public HttpResponse<String> createJob(HttpRequest<Void> request) throws URISyntaxException {
+    public HttpResponse<JobReference> createJob(HttpRequest<Void> request) throws URISyntaxException {
         var stateMachineArn = System.getenv("RETRIEVE_JOKE_STATE_MACHINE_ARN");
-        var referenceNumber = randomUUID().toString();
+        var referenceNumber = referenceNumberGenerator.generateReferenceNumber();
 
         log.info("Starting job {}", referenceNumber);
 
@@ -38,9 +41,9 @@ public class CreateJobController {
         if (request instanceof MicronautAwsProxyRequest) {
             var awsRequest = (MicronautAwsProxyRequest<Void>) request;
             String location = "https://" + request.getServerName() + awsRequest.getAwsProxyRequest().getRequestContext().getPath() + "/" + referenceNumber;
-            return HttpResponse.created(createJobReferenceJson(referenceNumber), new URI(location));
+            return HttpResponse.created(new JobReference(referenceNumber), new URI(location));
         } else {
-            return HttpResponse.created(createJobReferenceJson(referenceNumber));
+            return HttpResponse.created(new JobReference(referenceNumber));
         }
     }
 

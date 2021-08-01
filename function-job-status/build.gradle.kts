@@ -12,6 +12,9 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb")
 
     testImplementation("io.micronaut:micronaut-http-client")
+    testImplementation("org.assertj:assertj-core:3.20.2")
+    testImplementation ("org.mockito:mockito-core:3.+")
+    testImplementation ("org.mockito:mockito-junit-jupiter:3.+")
 
     annotationProcessor("io.micronaut:micronaut-inject-java")
 }
