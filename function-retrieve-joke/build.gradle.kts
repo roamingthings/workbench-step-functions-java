@@ -3,22 +3,6 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-version = "0.1"
-group = "de.roamingthings"
-
-repositories {
-    mavenCentral()
-}
-
-micronaut {
-    runtime("lambda")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("de.roamingthings.*")
-    }
-}
-
 dependencies {
     implementation("io.micronaut:micronaut-runtime")
     runtimeOnly("ch.qos.logback:logback-classic")
@@ -27,13 +11,5 @@ dependencies {
 
     implementation("io.micronaut.aws:micronaut-function-aws")
 
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
-}
-
-tasks.named("assemble") {
-    dependsOn("shadowJar")
+    annotationProcessor("io.micronaut:micronaut-inject-java")
 }

@@ -1,39 +1,22 @@
 plugins {
-    id("com.github.johnrengelman.shadow")
     id("io.micronaut.application")
-}
-
-version = "0.1"
-group = "de.roamingthings"
-
-repositories {
-    mavenCentral()
-}
-
-micronaut {
-    runtime("lambda")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("de.roamingthings.*")
-    }
+    id("com.github.johnrengelman.shadow")
 }
 
 dependencies {
     implementation("io.micronaut:micronaut-runtime")
-    runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
+    runtimeOnly("ch.qos.logback:logback-classic")
 
     implementation(platform("software.amazon.awssdk:bom:2.17.9"))
     implementation("software.amazon.awssdk:sfn")
 
     testImplementation("io.micronaut:micronaut-http-client")
+    testImplementation("org.assertj:assertj-core:3.20.2")
+
+    annotationProcessor("io.micronaut:micronaut-inject-java")
 }
 
 application {
-    mainClass.set("de.roamingthings.jokes.Application")
-}
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
+    mainClass.set("de.roamingthings.jokes.fn.createjob.Application")
 }
