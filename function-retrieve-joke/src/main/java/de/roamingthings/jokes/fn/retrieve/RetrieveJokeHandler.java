@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Clock;
+
+import static java.time.Instant.now;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
 @Introspected
 public class RetrieveJokeHandler extends MicronautRequestHandler<RetrieveJokeJob, JokeRetrieved> {
@@ -21,22 +21,18 @@ public class RetrieveJokeHandler extends MicronautRequestHandler<RetrieveJokeJob
     @Inject
     private JokeApiClient jokeApiClient;
 
+    @Inject
+    private Clock systemClock;
+
     @Override
     public JokeRetrieved execute(RetrieveJokeJob input) {
         Joke joke = jokeApiClient.fetchJoke().blockingGet();
 
         log.info("Retrieved joke {}", joke);
 
-        JokeRetrieved response = new JokeRetrieved();
-        response.setId(input.getRef());
-        response.setTimestamp(getISO8601StringForDate(new Date()));
-        response.setText(joke.getJoke());
-        return response;
-    }
-
-    private static String getISO8601StringForDate(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.format(date);
+        return new JokeRetrieved(
+                input.getRef(),
+                joke.getJoke(),
+                ISO_INSTANT.format(now(systemClock)));
     }
 }

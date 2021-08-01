@@ -1,5 +1,6 @@
 micronaut:
   application:
     name: function-retrieve-joke
+
 joke-api:
   type: single
