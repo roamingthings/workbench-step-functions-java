@@ -37,21 +37,4 @@ public class RetrieveJokeHandler extends MicronautRequestHandler<RetrieveJokeJob
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
     }
-/*
-    var date = new Date();
-
-    const res = await axios.get('https://v2.jokeapi.dev/joke/Programming?type=single');
-
-    const joke = res.data.joke;
-    console.log(joke);
-
-    let result = {
-        'id': event.ref,
-        'text': joke,
-        'timestamp': date.toISOString(),
-    }
-
-    console.info(`retrieve joke: ${JSON.stringify(result)}`);
-    return result;
-*/
 }

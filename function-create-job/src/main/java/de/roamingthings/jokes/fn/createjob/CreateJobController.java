@@ -15,8 +15,6 @@ import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static java.util.UUID.randomUUID;
-
 @Controller
 @Introspected
 public class CreateJobController {
