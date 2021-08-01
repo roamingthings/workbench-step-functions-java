@@ -1,4 +1,4 @@
-package de.roamingthings.jokes.fn.retrieve;
+package de.roamingthings.jokes.fn.retrieve.jokeapi;
 
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.http.annotation.Get;

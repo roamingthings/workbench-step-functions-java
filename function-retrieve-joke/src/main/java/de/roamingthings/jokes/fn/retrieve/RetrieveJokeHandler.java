@@ -1,5 +1,7 @@
 package de.roamingthings.jokes.fn.retrieve;
 
+import de.roamingthings.jokes.fn.retrieve.jokeapi.Joke;
+import de.roamingthings.jokes.fn.retrieve.jokeapi.JokeApiClient;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.function.aws.MicronautRequestHandler;
 import org.slf4j.Logger;

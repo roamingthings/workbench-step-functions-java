@@ -11,9 +11,15 @@ dependencies {
 
     implementation("io.micronaut.aws:micronaut-function-aws")
 
-    testImplementation("org.assertj:assertj-core:3.20.2")
-    testImplementation ("org.mockito:mockito-core:3.+")
-    testImplementation ("org.mockito:mockito-junit-jupiter:3.+")
+    compileOnly("org.projectlombok:lombok:1.18.20")
 
+    testImplementation("org.assertj:assertj-core:3.20.2")
+    testImplementation("org.mockito:mockito-core:3.+")
+    testImplementation("org.mockito:mockito-junit-jupiter:3.+")
+    testCompileOnly("org.projectlombok:lombok:1.18.20")
+
+    annotationProcessor("org.projectlombok:lombok:1.18.20")
     annotationProcessor("io.micronaut:micronaut-inject-java")
+
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.20")
 }
