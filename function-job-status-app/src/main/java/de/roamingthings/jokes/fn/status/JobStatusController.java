@@ -1,6 +1,7 @@
 package de.roamingthings.jokes.fn.status;
 
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
@@ -19,9 +20,14 @@ public class JobStatusController {
     private JobStatusRepository jobStatusRepository;
 
     @Get("/app/jobs/{jobId}")
-    public JobStatus retrieveJobStatus(@QueryValue("jobId") String jobId) {
+    public HttpResponse<JobStatus> retrieveJobStatus(@QueryValue("jobId") String jobId) {
         log.info("Getting status for job <{}>", jobId);
 
-        return jobStatusRepository.fetchJobStatusById(jobId);
+        var jobStatus = jobStatusRepository.fetchJobStatusById(jobId);
+        if (jobStatus == null) {
+            return HttpResponse.notFound();
+        } else {
+            return HttpResponse.ok(jobStatus);
+        }
     }
 }
