@@ -1,5 +1,6 @@
 package de.roamingthings.jokes.fn.retrieve;
 
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import static de.roamingthings.jokes.fn.retrieve.MockJokeApiClient.JOKE_TEXT;
 import static de.roamingthings.jokes.fn.retrieve.TestBeanFactory.SYSTEM_TIME;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+@MicronautTest
 class RetrieveJokeHandlerTest {
 
     private static final String REFERENCE = "d74de98e-3a72-4978-9eb5-195800cb1ab8";
