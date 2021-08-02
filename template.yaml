@@ -123,6 +123,35 @@ Resources:
             Path: /jobs/{jobId+}
             Method: get
 
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function-api-app
+      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      MemorySize: 512
+      Description: On App to handle all API calls
+      Environment:
+        Variables:
+          JOB_TABLE: !Ref JokesJobTable
+          RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
+          MICRONAUT_ENVIRONMENTS: aws,function
+      Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+        - DynamoDBReadPolicy:
+            TableName: !Ref JokesJobTable
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
+      Events:
+        JobStatusApiApp:
+          Type: Api
+          Properties:
+            Path: /api/jobs/{jobId+}
+            Method: get
+        CreateJobApiApp:
+          Type: Api
+          Properties:
+            Path: /api/jobs
+            Method: post
+
   JokesJobTable:
     Type: AWS::Serverless::SimpleTable # More info about SimpleTable Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-simpletable.html
     Properties:
@@ -140,6 +169,12 @@ Outputs:
   CreateJobApi:
     Description: "API Gateway endpoint URL for Prod stage for Create Job function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/jobs"
+  CreateJobAppApi:
+    Description: "API Gateway endpoint URL for Prod stage for Create Job function (implemented as app)"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/app/jobs"
+  CreateJobApiApi:
+    Description: "API Gateway endpoint URL for Prod stage for Create Job function (implemented as monolith app)"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/jobs"
   CreateJobFunction:
     Description: "Create Job Lambda Function ARN"
     Value: !GetAtt CreateJobFunction.Arn
