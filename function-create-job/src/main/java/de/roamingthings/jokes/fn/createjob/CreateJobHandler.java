@@ -1,25 +1,21 @@
 package de.roamingthings.jokes.fn.createjob;
 
+import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
+import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.function.aws.proxy.MicronautAwsProxyRequest;
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Post;
+import io.micronaut.function.aws.MicronautRequestHandler;
+import io.micronaut.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sfn.SfnClient;
 import software.amazon.awssdk.services.sfn.model.StartExecutionRequest;
 
 import javax.inject.Inject;
-import java.net.URI;
-import java.net.URISyntaxException;
 
-@Controller
 @Introspected
-public class CreateJobController {
+public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, AwsProxyResponse> {
 
-    private static final Logger log = LoggerFactory.getLogger(CreateJobController.class);
+    private static final Logger log = LoggerFactory.getLogger(CreateJobHandler.class);
 
     @Inject
     private SfnClient sfnClient;
@@ -27,8 +23,8 @@ public class CreateJobController {
     @Inject
     private ReferenceNumberGenerator referenceNumberGenerator;
 
-    @Post("/jobs")
-    public HttpResponse<JobReference> createJob(HttpRequest<Void> request) throws URISyntaxException {
+    @Override
+    public AwsProxyResponse execute(AwsProxyRequest input) {
         var stateMachineArn = System.getenv("RETRIEVE_JOKE_STATE_MACHINE_ARN");
         var referenceNumber = referenceNumberGenerator.generateReferenceNumber();
 
@@ -36,13 +32,12 @@ public class CreateJobController {
 
         startWorkflow(stateMachineArn, referenceNumber);
 
-        if (request instanceof MicronautAwsProxyRequest) {
-            var awsRequest = (MicronautAwsProxyRequest<Void>) request;
-            String location = "https://" + request.getServerName() + awsRequest.getAwsProxyRequest().getRequestContext().getPath() + "/" + referenceNumber;
-            return HttpResponse.created(new JobReference(referenceNumber), new URI(location));
-        } else {
-            return HttpResponse.created(new JobReference(referenceNumber));
-        }
+        var response = new AwsProxyResponse(HttpStatus.CREATED.getCode());
+        response.setBody(createJobReferenceJson(referenceNumber));
+//        String location = "https://" + input.getRequestContext().getDomainName() + input.getRequestContext().getPath() + "/" + referenceNumber;
+        String location = input.getRequestContext().getPath() + "/" + referenceNumber;
+        response.addHeader("Location", location);
+        return response;
     }
 
     private static String createJobReferenceJson(String referenceNumber) {

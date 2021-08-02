@@ -34,7 +34,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: function-create-job
-      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      Handler: de.roamingthings.jokes.fn.createjob.CreateJobHandler
       Description: Create and start a new job and return the job id
       Environment:
         Variables:
