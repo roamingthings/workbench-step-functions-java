@@ -50,6 +50,26 @@ Resources:
             Path: /jobs
             Method: post
 
+  CreateJobAppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function-create-job-app
+      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      Description: Create and start a new job and return the job id. Implemented as Micronaut application.
+      Environment:
+        Variables:
+          RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
+          MICRONAUT_ENVIRONMENTS: aws,function
+      Policies:
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
+      Events:
+        CreateJob:
+          Type: Api
+          Properties:
+            Path: /app/jobs
+            Method: post
+
   RetrieveJokeFunction:
     Type: AWS::Serverless::Function
     Properties:
