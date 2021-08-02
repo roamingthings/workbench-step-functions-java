@@ -1,5 +1,5 @@
 plugins {
-    id("io.micronaut.application")
+    id("io.micronaut.library")
     id("com.github.johnrengelman.shadow")
 }
 
@@ -8,8 +8,10 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
 
+    implementation("io.micronaut.aws:micronaut-function-aws")
     implementation(platform("software.amazon.awssdk:bom:2.17.9"))
     implementation("software.amazon.awssdk:dynamodb")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-core:1.6")
 
     compileOnly("org.projectlombok:lombok:1.18.20")
 
@@ -23,8 +25,4 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-inject-java")
 
     testAnnotationProcessor("org.projectlombok:lombok:1.18.20")
-}
-
-application {
-    mainClass.set("de.roamingthings.jokes.fn.status.Application")
 }

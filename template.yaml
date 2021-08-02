@@ -12,7 +12,7 @@ Globals:
       # Variables:
       #  SAMPLE_TABLE: !Ref SampleTable
     Runtime: java11
-    MemorySize: 384
+    MemorySize: 320
     Timeout: 20
 
 Resources:
@@ -55,6 +55,7 @@ Resources:
     Properties:
       CodeUri: function-create-job-app
       Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      MemorySize: 384
       Description: Create and start a new job and return the job id. Implemented as Micronaut application.
       Environment:
         Variables:
@@ -86,6 +87,7 @@ Resources:
     Properties:
       CodeUri: function-job-status-app
       Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      MemorySize: 384
       Description: Retrieve the current status of a job. Implemented as Micronaut application.
       Environment:
         Variables:
@@ -98,14 +100,14 @@ Resources:
         JobStatus:
           Type: Api
           Properties:
-            Path: /app/jobs/{proxy+}
+            Path: /app/jobs/{jobId+}
             Method: get
 
   JobStatusFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: function-job-status
-      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      Handler: de.roamingthings.jokes.fn.status.JobStatusHandler
       Description: Retrieve the current status of a job
       Environment:
         Variables:
@@ -118,7 +120,7 @@ Resources:
         JobStatus:
           Type: Api
           Properties:
-            Path: /jobs/{proxy+}
+            Path: /jobs/{jobId+}
             Method: get
 
   JokesJobTable:
