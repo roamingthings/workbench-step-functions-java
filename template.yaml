@@ -30,6 +30,7 @@ Resources:
         - DynamoDBWritePolicy:
             TableName: !Ref JokesJobTable
 
+  # Functions implemented as single micronaut functions
   CreateJobFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -49,59 +50,6 @@ Resources:
           Properties:
             Path: /jobs
             Method: post
-
-  CreateJobAppFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: function-create-job-app
-      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
-      MemorySize: 384
-      Description: Create and start a new job and return the job id. Implemented as Micronaut application.
-      Environment:
-        Variables:
-          RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
-          MICRONAUT_ENVIRONMENTS: aws,function
-      Policies:
-        - StepFunctionsExecutionPolicy:
-            StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
-      Events:
-        CreateJob:
-          Type: Api
-          Properties:
-            Path: /app/jobs
-            Method: post
-
-  RetrieveJokeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: function-retrieve-joke
-      Handler: de.roamingthings.jokes.fn.retrieve.RetrieveJokeHandler
-      Description: Retrieve a Joke from the external JokeAPI
-      MemorySize: 384
-      Environment:
-        Variables:
-          MICRONAUT_ENVIRONMENTS: aws,function
-
-  JobStatusAppFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: function-job-status-app
-      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
-      MemorySize: 384
-      Description: Retrieve the current status of a job. Implemented as Micronaut application.
-      Environment:
-        Variables:
-          JOB_TABLE: !Ref JokesJobTable
-          MICRONAUT_ENVIRONMENTS: aws,function
-      Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
-        - DynamoDBReadPolicy:
-            TableName: !Ref JokesJobTable
-      Events:
-        JobStatus:
-          Type: Api
-          Properties:
-            Path: /app/jobs/{jobId+}
-            Method: get
 
   JobStatusFunction:
     Type: AWS::Serverless::Function
@@ -123,6 +71,61 @@ Resources:
             Path: /jobs/{jobId+}
             Method: get
 
+  RetrieveJokeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function-retrieve-joke
+      Handler: de.roamingthings.jokes.fn.retrieve.RetrieveJokeHandler
+      Description: Retrieve a Joke from the external JokeAPI
+      MemorySize: 384
+      Environment:
+        Variables:
+          MICRONAUT_ENVIRONMENTS: aws,function
+
+  # Functions implemented as single micronaut applications
+  CreateJobAppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function-app-create-job
+      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      MemorySize: 384
+      Description: Create and start a new job and return the job id. Implemented as Micronaut application.
+      Environment:
+        Variables:
+          RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
+          MICRONAUT_ENVIRONMENTS: aws,function
+      Policies:
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
+      Events:
+        CreateJob:
+          Type: Api
+          Properties:
+            Path: /app/jobs
+            Method: post
+
+  JobStatusAppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function-app-job-status
+      Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
+      MemorySize: 384
+      Description: Retrieve the current status of a job. Implemented as Micronaut application.
+      Environment:
+        Variables:
+          JOB_TABLE: !Ref JokesJobTable
+          MICRONAUT_ENVIRONMENTS: aws,function
+      Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+        - DynamoDBReadPolicy:
+            TableName: !Ref JokesJobTable
+      Events:
+        JobStatus:
+          Type: Api
+          Properties:
+            Path: /app/jobs/{jobId+}
+            Method: get
+
+  # Function implemented as monolith micronaut applications
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
