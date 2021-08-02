@@ -14,6 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+import static io.micronaut.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static io.micronaut.http.HttpStatus.NOT_FOUND;
+import static io.micronaut.http.HttpStatus.OK;
+import static io.micronaut.http.MediaType.APPLICATION_JSON;
+
 @Introspected
 public class JobStatusHandler extends MicronautRequestHandler<AwsProxyRequest, AwsProxyResponse> {
 
@@ -29,7 +34,7 @@ public class JobStatusHandler extends MicronautRequestHandler<AwsProxyRequest, A
     public AwsProxyResponse execute(AwsProxyRequest input) {
         var jobId = input.getPathParameters().get("jobId");
         if (jobId == null || jobId.isBlank()) {
-            return new AwsProxyResponse(HttpStatus.NOT_FOUND.getCode());
+            return new AwsProxyResponse(NOT_FOUND.getCode());
         }
 
         log.info("Getting status for job <{}>", jobId);
@@ -37,15 +42,15 @@ public class JobStatusHandler extends MicronautRequestHandler<AwsProxyRequest, A
         var jobStatus = jobStatusRepository.fetchJobStatusById(jobId);
 
         if (jobStatus == null) {
-            return new AwsProxyResponse(HttpStatus.NOT_FOUND.getCode());
+            return new AwsProxyResponse(NOT_FOUND.getCode());
         } else {
             Headers headers = new Headers();
-            headers.add("Content-Type", MediaType.APPLICATION_JSON);
+            headers.add("Content-Type", APPLICATION_JSON);
             try {
-                return new AwsProxyResponse(HttpStatus.OK.getCode(), headers, objectMapper.writeValueAsString(jobStatus));
+                return new AwsProxyResponse(OK.getCode(), headers, objectMapper.writeValueAsString(jobStatus));
             } catch (JsonProcessingException e) {
                 log.error("Could not serialize response: ", e);
-                return new AwsProxyResponse(HttpStatus.INTERNAL_SERVER_ERROR.getCode());
+                return new AwsProxyResponse(INTERNAL_SERVER_ERROR.getCode());
             }
         }
     }
