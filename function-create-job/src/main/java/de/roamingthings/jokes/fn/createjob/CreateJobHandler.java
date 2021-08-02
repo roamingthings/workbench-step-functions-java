@@ -4,13 +4,14 @@ import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.function.aws.MicronautRequestHandler;
-import io.micronaut.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sfn.SfnClient;
 import software.amazon.awssdk.services.sfn.model.StartExecutionRequest;
 
 import javax.inject.Inject;
+
+import static io.micronaut.http.HttpStatus.CREATED;
 
 @Introspected
 public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, AwsProxyResponse> {
@@ -32,16 +33,7 @@ public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, A
 
         startWorkflow(stateMachineArn, referenceNumber);
 
-        var response = new AwsProxyResponse(HttpStatus.CREATED.getCode());
-        response.setBody(createJobReferenceJson(referenceNumber));
-//        String location = "https://" + input.getRequestContext().getDomainName() + input.getRequestContext().getPath() + "/" + referenceNumber;
-        String location = input.getRequestContext().getPath() + "/" + referenceNumber;
-        response.addHeader("Location", location);
-        return response;
-    }
-
-    private static String createJobReferenceJson(String referenceNumber) {
-        return "{ \"ref\": \"" + referenceNumber + "\" }";
+        return createResponse(input, referenceNumber);
     }
 
     public void startWorkflow(String stateMachineArn, String referenceNumber) {
@@ -52,5 +44,33 @@ public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, A
                 .build();
 
         sfnClient.startExecution(executionRequest);
+    }
+
+    private AwsProxyResponse createResponse(AwsProxyRequest input, String referenceNumber) {
+        var response = new AwsProxyResponse(CREATED.getCode());
+        response.setBody(createJobReferenceJson(referenceNumber));
+        var locationBaseUri = locationBaseUriOf(input);
+        if (locationBaseUri != null) {
+            response.addHeader("Location", locationBaseUri + "/" + referenceNumber);
+        }
+        return response;
+    }
+
+    private String locationBaseUriOf(AwsProxyRequest input) {
+        String domainName = domainNameFrom(input);
+        if (domainName != null) {
+            return "https://" + domainName + "/" + input.getRequestContext().getStage() + input.getPath();
+        } else {
+            return null;
+        }
+    }
+
+    private String domainNameFrom(AwsProxyRequest input) {
+        var hostHeaders = input.getMultiValueHeaders().get("Host");
+        return (hostHeaders != null && !hostHeaders.isEmpty()) ? hostHeaders.get(0) : null;
+    }
+
+    private static String createJobReferenceJson(String referenceNumber) {
+        return "{ \"ref\": \"" + referenceNumber + "\" }";
     }
 }
