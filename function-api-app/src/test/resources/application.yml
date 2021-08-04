@@ -1,0 +1,2 @@
+JOB_TABLE: testTable
+RETRIEVE_JOKE_STATE_MACHINE_ARN: testStateMachine

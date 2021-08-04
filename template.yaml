@@ -12,7 +12,7 @@ Globals:
       # Variables:
       #  SAMPLE_TABLE: !Ref SampleTable
     Runtime: java11
-    MemorySize: 320
+    MemorySize: 512
     Timeout: 20
 
 Resources:
@@ -77,7 +77,6 @@ Resources:
       CodeUri: function-retrieve-joke
       Handler: de.roamingthings.jokes.fn.retrieve.RetrieveJokeHandler
       Description: Retrieve a Joke from the external JokeAPI
-      MemorySize: 384
       Environment:
         Variables:
           MICRONAUT_ENVIRONMENTS: aws,function
@@ -88,7 +87,6 @@ Resources:
     Properties:
       CodeUri: function-app-create-job
       Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
-      MemorySize: 384
       Description: Create and start a new job and return the job id. Implemented as Micronaut application.
       Environment:
         Variables:
@@ -109,7 +107,6 @@ Resources:
     Properties:
       CodeUri: function-app-job-status
       Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
-      MemorySize: 384
       Description: Retrieve the current status of a job. Implemented as Micronaut application.
       Environment:
         Variables:
@@ -131,7 +128,6 @@ Resources:
     Properties:
       CodeUri: function-api-app
       Handler: io.micronaut.function.aws.proxy.MicronautLambdaHandler
-      MemorySize: 512
       Description: On App to handle all API calls
       Environment:
         Variables:

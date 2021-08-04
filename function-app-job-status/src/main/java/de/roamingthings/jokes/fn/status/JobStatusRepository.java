@@ -1,5 +1,6 @@
 package de.roamingthings.jokes.fn.status;
 
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -14,18 +15,19 @@ import java.util.Map;
 @Introspected
 public class JobStatusRepository {
 
-    private final DynamoDbClient dynamoDbClient;
-
     private static final String STATUS_COLUMN = "Status";
     private static final String TEXT_COLUMN = "Text";
+
+    @Value("${JOB_TABLE}")
+    private String jobTable;
+
+    private final DynamoDbClient dynamoDbClient;
 
     public JobStatusRepository(DynamoDbClient dynamoDbClient) {
         this.dynamoDbClient = dynamoDbClient;
     }
 
     public JobStatus fetchJobStatusById(String idValue) {
-        var jobTable = System.getenv("JOB_TABLE");
-
         var keyToGet = new HashMap<String, AttributeValue>();
         keyToGet.put("Id", AttributeValue.builder()
                 .s(idValue)

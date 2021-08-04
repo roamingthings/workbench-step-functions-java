@@ -33,6 +33,7 @@ class CreateJobControllerTest {
     @BeforeAll
     public static void setupSpec() {
         try {
+            System.setProperty("RETRIEVE_JOKE_STATE_MACHINE_ARN", "testStateMachine");
             handler = new MicronautLambdaHandler();
             objectMapper = handler.getApplicationContext().getBean(ObjectMapper.class);
             referenceNumberGenerator = handler.getApplicationContext().getBean(ReferenceNumberGenerator.class);

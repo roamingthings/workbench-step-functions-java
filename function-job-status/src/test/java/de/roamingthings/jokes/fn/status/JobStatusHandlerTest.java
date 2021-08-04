@@ -26,6 +26,7 @@ class JobStatusHandlerTest {
 
     @BeforeAll
     public static void setupSpec() {
+        System.setProperty("JOB_TABLE", "testTable");
         handler = new JobStatusHandler();
         jobStatusRepository = handler.getApplicationContext().getBean(JobStatusRepository.class);
     }

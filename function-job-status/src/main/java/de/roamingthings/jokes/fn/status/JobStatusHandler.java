@@ -7,8 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.function.aws.MicronautRequestHandler;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

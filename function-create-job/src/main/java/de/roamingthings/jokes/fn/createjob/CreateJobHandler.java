@@ -2,6 +2,7 @@ package de.roamingthings.jokes.fn.createjob;
 
 import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.function.aws.MicronautRequestHandler;
 import org.slf4j.Logger;
@@ -18,6 +19,9 @@ public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, A
 
     private static final Logger log = LoggerFactory.getLogger(CreateJobHandler.class);
 
+    @Value("${RETRIEVE_JOKE_STATE_MACHINE_ARN}")
+    private String stateMachineArn;
+
     @Inject
     private SfnClient sfnClient;
 
@@ -26,7 +30,6 @@ public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, A
 
     @Override
     public AwsProxyResponse execute(AwsProxyRequest input) {
-        var stateMachineArn = System.getenv("RETRIEVE_JOKE_STATE_MACHINE_ARN");
         var referenceNumber = referenceNumberGenerator.generateReferenceNumber();
 
         log.info("Starting job {}", referenceNumber);

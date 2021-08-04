@@ -1,5 +1,6 @@
 package de.roamingthings.jokes.fn.createjob;
 
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.function.aws.proxy.MicronautAwsProxyRequest;
 import io.micronaut.http.HttpRequest;
@@ -21,6 +22,9 @@ public class CreateJobController {
 
     private static final Logger log = LoggerFactory.getLogger(CreateJobController.class);
 
+    @Value("${RETRIEVE_JOKE_STATE_MACHINE_ARN}")
+    private String stateMachineArn;
+
     @Inject
     private SfnClient sfnClient;
 
@@ -29,7 +33,6 @@ public class CreateJobController {
 
     @Post("/app/jobs")
     public HttpResponse<JobReference> createJob(HttpRequest<Void> request) throws URISyntaxException {
-        var stateMachineArn = System.getenv("RETRIEVE_JOKE_STATE_MACHINE_ARN");
         var referenceNumber = referenceNumberGenerator.generateReferenceNumber();
 
         log.info("Starting job {}", referenceNumber);
