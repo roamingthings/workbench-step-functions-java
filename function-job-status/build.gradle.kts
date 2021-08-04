@@ -9,11 +9,10 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
 
     implementation("io.micronaut.aws:micronaut-function-aws")
-    implementation(platform("software.amazon.awssdk:bom:2.17.9"))
-    implementation("software.amazon.awssdk:dynamodb")
+    implementation("software.amazon.awssdk:dynamodb:2.17.9")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-core:1.6")
     // Alternative source for Lambda
-    implementation("com.amazonaws:aws-lambda-java-events:3.9.0")
+//    implementation("com.amazonaws:aws-lambda-java-events:3.9.0")
 
     compileOnly("org.projectlombok:lombok:1.18.20")
 

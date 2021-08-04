@@ -8,9 +8,8 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
     runtimeOnly("ch.qos.logback:logback-classic")
 
-    implementation(platform("software.amazon.awssdk:bom:2.17.9"))
-    implementation("software.amazon.awssdk:sfn")
-    implementation("software.amazon.awssdk:dynamodb")
+    implementation("software.amazon.awssdk:sfn:2.17.9")
+    implementation("software.amazon.awssdk:dynamodb:2.17.9")
 
     compileOnly("org.projectlombok:lombok:1.18.20")
 
