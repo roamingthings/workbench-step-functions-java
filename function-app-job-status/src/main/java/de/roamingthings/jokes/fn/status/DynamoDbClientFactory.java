@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import javax.inject.Singleton;
 
+import static software.amazon.awssdk.regions.Region.EU_CENTRAL_1;
+
 @Factory
 @Introspected
 public class DynamoDbClientFactory {
@@ -23,7 +25,9 @@ public class DynamoDbClientFactory {
     DynamoDbClient dynamoDbClientProd() {
         log.info("Setting AWS Credentials from Attached Role attached to Lambda Function.");
         log.info("See this - https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html");
-        return DynamoDbClient.builder().build();
+        return DynamoDbClient.builder()
+                .region(EU_CENTRAL_1)
+                .build();
     }
 
     @Bean
@@ -33,6 +37,7 @@ public class DynamoDbClientFactory {
         log.info("Setting EnvironmentVariableCredentialsProvider for AWS Credentials which would fetch credentials from Environment variables.");
         log.info("See this to set AWS Credentials Locally - https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html");
         return DynamoDbClient.builder()
+                .region(EU_CENTRAL_1)
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .build();
     }
