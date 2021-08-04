@@ -1,15 +1,47 @@
 # Workbench for AWS Step Functions
 
-This workbench project is used to experiment with [AWS Step Functions](https://aws.amazon.com/step-functions/).
+This project demonstrates how to implement a serverless application using Java and the [Micronaut](https://micronaut.io)
+Framework.
+
+The following AWS technologies are used:
+* [API Gateway](https://aws.amazon.com/api-gateway/) to provide calls into the application
+* [Lambda](https://aws.amazon.com/lambda/) for 
+* [Step Functions](https://aws.amazon.com/step-functions/) for building the business workflow
+* [Serverless Application Model (SAM)](https://aws.amazon.com/serverless/sam/) for deployment 
 
 The application uses a workflow to retrieve a joke from [JokeAPI](https://jokeapi.dev/) and store the result in a
 [DynamoDB](https://aws.amazon.com/dynamodb/) table in anasynchronous way.
 
+## Architecture
+
+The application utilizes the following services:
+* an API Gateway to handle incoming requests
+* a Lambda function to create a new job and trigger the main workflow
+* the main workflow implemented as a Step Functions statemachine responsible for tracking the job status and querying
+the Joke API
+* a Lambda function that actually talks to the Joke API to retrieve a new joke
+* a Lambda function to query the status of a given job including the joke that has been retrieved
+* a DynamoDB table persisting the state of a job and the retrieved joke
+
 ![Architecture](resources/workbench-step-functions.png)
 
-There are two endpoints that can be used by clients. The first endpoint is used to create a new job that will retrieve
-a joke. The second endpoint allows the client to query the current state of the job and get the joke, after the job has
-been completed.
+When using Micronaut as framework there are different ways to implement the application. The following sections outline
+three different approaches.
+
+### One Micronaut function per Lambda function
+
+In this approach every lambda function has its own codebase and are implemented separately. The functions are
+implemented as Micronaut function and thus only have a thin layer for handling incoming events. 
+
+![Architecture](resources/architecture-mn-functions.png)
+
+### One Micronaut app per Lambda function 
+
+![Architecture](resources/architecture-mn-apps.png)
+
+### One Micronaut app for all API calls
+
+![Architecture](resources/architecture-mn-api.png)
 
 ## Deploy the application
 
