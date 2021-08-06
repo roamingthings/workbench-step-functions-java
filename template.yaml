@@ -8,9 +8,9 @@ Description: >
 Globals:
   Function:
     Environment:
-      # # Environment variables used by every function
-      # Variables:
-      #  SAMPLE_TABLE: !Ref SampleTable
+      Variables:
+        POWERTOOLS_METRICS_NAMESPACE: WorkbenchStepFunctionsJava
+        POWERTOOLS_LOG_LEVEL: info
     Runtime: java11
     MemorySize: 512
     Timeout: 20
@@ -43,8 +43,6 @@ Resources:
           RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
           MICRONAUT_ENVIRONMENTS: aws,function
           POWERTOOLS_SERVICE_NAME: CreateJobFunction
-          POWERTOOLS_METRICS_NAMESPACE: WorkbenchStepFunctionsJava
-          POWERTOOLS_LOG_LEVEL: info
       Policies:
         - StepFunctionsExecutionPolicy:
             StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
@@ -65,6 +63,7 @@ Resources:
         Variables:
           JOB_TABLE: !Ref JokesJobTable
           MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: JobStatusFunction
       Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
         - DynamoDBReadPolicy:
             TableName: !Ref JokesJobTable
@@ -84,6 +83,7 @@ Resources:
       Environment:
         Variables:
           MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: RetrieveJokeFunction
 
   # Functions implemented as single micronaut applications
   CreateJobAppFunction:
@@ -96,6 +96,7 @@ Resources:
         Variables:
           RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
           MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: CreateJobAppFunction
       Policies:
         - StepFunctionsExecutionPolicy:
             StateMachineName: !GetAtt RetrieveJokeStateMachine.Name
@@ -116,6 +117,7 @@ Resources:
         Variables:
           JOB_TABLE: !Ref JokesJobTable
           MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: JobStatusAppFunction
       Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
         - DynamoDBReadPolicy:
             TableName: !Ref JokesJobTable
@@ -138,6 +140,7 @@ Resources:
           JOB_TABLE: !Ref JokesJobTable
           RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
           MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: ApiFunction
       Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
         - DynamoDBReadPolicy:
             TableName: !Ref JokesJobTable

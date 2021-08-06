@@ -6,6 +6,7 @@ import io.micronaut.core.annotation.Introspected;
 import io.micronaut.function.aws.MicronautRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.lambda.powertools.logging.LoggingUtils;
 
 import javax.inject.Inject;
 import java.time.Clock;
@@ -26,6 +27,7 @@ public class RetrieveJokeHandler extends MicronautRequestHandler<RetrieveJokeJob
 
     @Override
     public JokeRetrieved execute(RetrieveJokeJob input) {
+        LoggingUtils.appendKey("jokeJobReferenceNumber", input.getRef());
         Joke joke = jokeApiClient.fetchJoke().blockingGet();
 
         log.info("Retrieved joke {}", joke);

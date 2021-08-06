@@ -6,10 +6,16 @@ plugins {
 dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut:micronaut-validation")
-    runtimeOnly("ch.qos.logback:logback-classic")
 
     implementation("software.amazon.awssdk:sfn:2.17.9")
     implementation("software.amazon.awssdk:dynamodb:2.17.9")
+
+    implementation("org.apache.logging.log4j:log4j-core:2.14.1")
+    implementation("org.apache.logging.log4j:log4j-api:2.14.1")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.14.1")
+    implementation("software.amazon.lambda:powertools-logging:1.7.2")
+    implementation("software.amazon.lambda:powertools-metrics:1.7.2")
+    implementation("software.amazon.lambda:powertools-tracing:1.7.2")
 
     compileOnly("org.projectlombok:lombok:1.18.20")
 
