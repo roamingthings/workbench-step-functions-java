@@ -37,10 +37,14 @@ Resources:
       CodeUri: function-create-job
       Handler: de.roamingthings.jokes.fn.createjob.CreateJobHandler
       Description: Create and start a new job and return the job id
+      Tracing: Active
       Environment:
         Variables:
           RETRIEVE_JOKE_STATE_MACHINE_ARN: !Ref RetrieveJokeStateMachine
           MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: CreateJobFunction
+          POWERTOOLS_METRICS_NAMESPACE: WorkbenchStepFunctionsJava
+          POWERTOOLS_LOG_LEVEL: info
       Policies:
         - StepFunctionsExecutionPolicy:
             StateMachineName: !GetAtt RetrieveJokeStateMachine.Name

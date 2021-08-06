@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sfn.SfnClient;
 import software.amazon.awssdk.services.sfn.model.StartExecutionRequest;
+import software.amazon.lambda.powertools.logging.LoggingUtils;
 
 import javax.inject.Inject;
 
@@ -32,7 +33,8 @@ public class CreateJobHandler extends MicronautRequestHandler<AwsProxyRequest, A
     public AwsProxyResponse execute(AwsProxyRequest input) {
         var referenceNumber = referenceNumberGenerator.generateReferenceNumber();
 
-        log.info("Starting job {}", referenceNumber);
+        LoggingUtils.appendKey("jokeJobReferenceNumber", referenceNumber);
+        log.info("Starting joke job");
 
         startWorkflow(stateMachineArn, referenceNumber);
 
