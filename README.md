@@ -54,6 +54,31 @@ test each function or application individually by running
 ../gradlew clean build
 ```
 
+### Disable tests during `sam build`
+
+By default, Gradle will run all tests each time `sam build` is called. This is also true when using the AWS Toolbox in
+IntelliJ or Visual Studio Code. This will slow down the development process or even prevent local execution due to
+failing tests.
+
+To prevent tests being run by `sam build` create a file `$HOME/.gradle/init.gradle.kts` and add the following lines:
+
+```kotlin
+allprojects {
+    tasks.withType(Test::class) {
+        onlyIf {
+            System.getProperty("software.amazon.aws.lambdabuilders.scratch-dir") == null
+                    || System.getenv("GRADLE_SAM_EXECUTE_TEST") != null
+        }
+    }
+}
+```
+
+You can turn on testing by setting the environment variable `GRADLE_SAM_EXECUTE_TEST` to any value:
+
+```shell
+GRADLE_SAM_EXECUTE_TEST=true sam build
+```
+
 ## Deploy the application
 
 After building the application it can be deployed to your AWS account. Make sure that you have a working configuration

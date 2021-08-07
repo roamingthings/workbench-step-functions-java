@@ -41,11 +41,6 @@ subprojects {
         }
     }
 
-    // Skip tests if the environment variable GRADLE_SKIP_TESTS is present
-    tasks.withType(Test::class) {
-        onlyIf { System.getenv("GRADLE_SKIP_TESTS") == null }
-    }
-
     afterEvaluate {
         if (plugins.hasPlugin("io.micronaut.library")) {
             tasks.named("assemble") {
