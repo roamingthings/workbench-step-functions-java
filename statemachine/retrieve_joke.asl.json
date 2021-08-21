@@ -11,6 +11,9 @@
           "Id": {
             "S.$": "$.ref"
           },
+          "Akteur": {
+            "S.$": "$.akteur"
+          },
           "Status": "CREATED"
         }
       },
@@ -44,20 +47,24 @@
     },
     "Update Job Details": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::dynamodb:putItem",
+      "Resource": "${DDBUpdateJokesJob}",
       "Parameters": {
         "TableName": "${DDBTable}",
-        "Item": {
+        "Key": {
           "Id": {
             "S.$": "$.id"
-          },
-          "Text": {
-            "S.$": "$.text"
-          },
-          "Timestamp": {
-            "S.$": "$.timestamp"
-          },
-          "Status": "FINISHED"
+          }
+        },
+        "UpdateExpression": "SET #txt = :textValue, #ts = :timestampValue, #sts = :statusValue",
+        "ExpressionAttributeValues": {
+          ":textValue": {"S.$": "$.text"},
+          ":timestampValue": {"S.$": "$.timestamp"},
+          ":statusValue": {"S": "FINISHED"}
+        },
+        "ExpressionAttributeNames": {
+          "#txt": "Text",
+          "#ts": "Timestamp",
+          "#sts": "Status"
         }
       },
       "Retry": [

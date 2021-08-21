@@ -8,10 +8,10 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
 
     implementation("io.micronaut.aws:micronaut-function-aws")
-    implementation("software.amazon.awssdk:sfn:2.17.9")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-core:1.6")
-    // Alternative source for Lambda
+    implementation("io.micronaut.aws:micronaut-aws-secretsmanager:2.10.0")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.12.1")
     implementation("com.amazonaws:aws-lambda-java-events:3.9.0")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-core:1.6")
 
     implementation("org.apache.logging.log4j:log4j-core:2.14.1")
     implementation("org.apache.logging.log4j:log4j-api:2.14.1")

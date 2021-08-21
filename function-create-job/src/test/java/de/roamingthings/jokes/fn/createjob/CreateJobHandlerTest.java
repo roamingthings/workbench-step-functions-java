@@ -1,11 +1,10 @@
 package de.roamingthings.jokes.fn.createjob;
 
-import com.amazonaws.serverless.proxy.internal.testutils.AwsProxyRequestBuilder;
 import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
-import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
-import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.services.lambda.runtime.Context;
-import io.micronaut.http.HttpMethod;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.assertj.core.api.SoftAssertions;
@@ -13,6 +12,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.micronaut.http.HttpMethod.POST;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 
 @MicronautTest
@@ -39,32 +44,42 @@ class CreateJobHandlerTest {
     @Test
     void should_respond_with_reference_number() {
         doReturn(REFERENCE_NUMBER).when(referenceNumberGenerator).generateReferenceNumber();
-        AwsProxyRequest request = new AwsProxyRequestBuilder("/jobs", HttpMethod.POST.toString())
-                .method(HttpMethod.POST.toString())
-                .path("/jobs")
-                .header("Host", "testdomain.de")
-                .stage("Test")
-                .build();
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Host", singletonList("testdomain.de"));
+        Map<String, Object> authorizer = new HashMap<>();
+        authorizer.put("principalId", "testPrincipal");
+        var requestContext = new ProxyRequestContext()
+                .withStage("Test");
+        requestContext.setAuthorizer(authorizer);
+        var request = new APIGatewayProxyRequestEvent()
+                .withHttpMethod(POST.toString())
+                .withPath("/jobs")
+                .withRequestContext(requestContext)
+                .withMultiValueHeaders(headers);
 
-        AwsProxyResponse response = handler.handleRequest(request, lambdaContext);
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, lambdaContext);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED.getCode());
             softly.assertThat(response.getBody()).isEqualTo("{ \"ref\": \"" + REFERENCE_NUMBER + "\" }");
-            softly.assertThat(response.getMultiValueHeaders().get("Location").get(0)).isEqualTo("https://testdomain.de/Test/jobs/c6939f59-97d5-4359-a363-7d42463f1865");
+            softly.assertThat(response.getHeaders().get("Location")).isEqualTo("https://testdomain.de/Test/jobs/c6939f59-97d5-4359-a363-7d42463f1865");
         });
     }
 
     @Test
     void should_respond_without_location_if_no_host_in_request() {
         doReturn(REFERENCE_NUMBER).when(referenceNumberGenerator).generateReferenceNumber();
-        AwsProxyRequest request = new AwsProxyRequestBuilder("/jobs", HttpMethod.POST.toString())
-                .method(HttpMethod.POST.toString())
-                .path("/jobs")
-                .stage("Test")
-                .build();
+        Map<String, Object> authorizer = new HashMap<>();
+        authorizer.put("principalId", "testPrincipal");
+        var requestContext = new ProxyRequestContext()
+                .withStage("Test");
+        requestContext.setAuthorizer(authorizer);
+        var request = new APIGatewayProxyRequestEvent()
+                .withHttpMethod(POST.toString())
+                .withPath("/jobs")
+                .withRequestContext(requestContext);
 
-        AwsProxyResponse response = handler.handleRequest(request, lambdaContext);
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, lambdaContext);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED.getCode());

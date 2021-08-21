@@ -31,16 +31,18 @@ public class CreateJobController {
     @Inject
     private ReferenceNumberGenerator referenceNumberGenerator;
 
-    @Post("/api/jobs")
+    @Post("/jobs")
     public HttpResponse<JobReference> createJob(HttpRequest<Void> request) throws URISyntaxException {
         var referenceNumber = referenceNumberGenerator.generateReferenceNumber();
 
         log.info("Starting job {}", referenceNumber);
 
-        startWorkflow(stateMachineArn, referenceNumber);
-
         if (request instanceof MicronautAwsProxyRequest) {
             var awsRequest = (MicronautAwsProxyRequest<Void>) request;
+            var principalId = awsRequest.getAwsProxyRequest().getRequestContext().getAuthorizer().getPrincipalId();
+
+            startWorkflow(stateMachineArn, referenceNumber, principalId);
+
             String location = "https://" + request.getServerName() + awsRequest.getAwsProxyRequest().getRequestContext().getPath() + "/" + referenceNumber;
             return HttpResponse.created(new JobReference(referenceNumber), new URI(location));
         } else {
@@ -48,17 +50,17 @@ public class CreateJobController {
         }
     }
 
-    private static String createJobReferenceJson(String referenceNumber) {
-        return "{ \"ref\": \"" + referenceNumber + "\" }";
-    }
-
-    public void startWorkflow(String stateMachineArn, String referenceNumber) {
+    public void startWorkflow(String stateMachineArn, String referenceNumber, String principalId) {
         var executionRequest = StartExecutionRequest.builder()
-                .input(createJobReferenceJson(referenceNumber))
+                .input(createStateMachineInput(referenceNumber, principalId))
                 .stateMachineArn(stateMachineArn)
                 .name(referenceNumber)
                 .build();
 
         sfnClient.startExecution(executionRequest);
+    }
+
+    private static String createStateMachineInput(String referenceNumber, String principalId) {
+        return "{ \"ref\": \"" + referenceNumber + "\", \"akteur\": \"" + principalId + "\" }";
     }
 }

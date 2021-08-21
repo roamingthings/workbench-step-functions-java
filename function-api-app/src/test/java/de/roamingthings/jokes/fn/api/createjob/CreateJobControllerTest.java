@@ -49,7 +49,8 @@ class CreateJobControllerTest {
     @Test
     void should_respond_with_reference_number() throws JsonProcessingException {
         doReturn(REFERENCE_NUMBER).when(referenceNumberGenerator).generateReferenceNumber();
-        AwsProxyRequest request = new AwsProxyRequestBuilder("/api/jobs", HttpMethod.POST.toString())
+        AwsProxyRequest request = new AwsProxyRequestBuilder("/jobs", HttpMethod.POST.toString())
+                .authorizerContextValue("principalId", "testUser")
                 .build();
 
         AwsProxyResponse response = handler.handleRequest(request, lambdaContext);

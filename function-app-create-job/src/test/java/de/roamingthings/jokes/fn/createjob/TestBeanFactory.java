@@ -6,6 +6,7 @@ import io.micronaut.context.annotation.Primary;
 import software.amazon.awssdk.services.sfn.SfnClient;
 
 import javax.inject.Singleton;
+import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Mockito.mock;
 
@@ -24,5 +25,12 @@ public class TestBeanFactory {
     @Primary
     ReferenceNumberGenerator referenceNumberGenerator() {
         return mock(ReferenceNumberGenerator.class);
+    }
+
+    @Bean
+    @Singleton
+    @Primary
+    SecurityContext securityContext() {
+        return mock(SecurityContext.class);
     }
 }

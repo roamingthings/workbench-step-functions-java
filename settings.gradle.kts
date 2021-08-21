@@ -6,5 +6,6 @@ include(
     "function-app-job-status",
     "function-create-job",
     "function-job-status",
-    "function-retrieve-joke"
+    "function-retrieve-joke",
+    "function-authorizer"
 )

@@ -1,6 +1,0 @@
-applicationType: default
-defaultPackage: de.roamingthings.jokes.fn.status
-testFramework: junit
-sourceLanguage: java
-buildTool: gradle
-features: [app-name, aws-lambda, gradle, java, java-application, junit, logback, readme, shade, yaml]

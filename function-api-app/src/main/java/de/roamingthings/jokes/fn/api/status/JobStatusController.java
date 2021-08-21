@@ -19,7 +19,7 @@ public class JobStatusController {
     @Inject
     private JobStatusRepository jobStatusRepository;
 
-    @Get("/api/jobs/{jobId}")
+    @Get("/jobs/{jobId}")
     public HttpResponse<JobStatus> retrieveJobStatus(@QueryValue("jobId") String jobId) {
         log.info("Getting status for job <{}>", jobId);
 

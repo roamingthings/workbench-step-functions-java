@@ -14,6 +14,20 @@ Globals:
     Runtime: java11
     MemorySize: 512
     Timeout: 20
+  Api:
+    Auth:
+      DefaultAuthorizer: JokeApplicationAuthorizer
+      Authorizers:
+        JokeApplicationAuthorizer:
+          FunctionPayloadType: REQUEST
+          FunctionArn: !GetAtt AuthorizerFunction.Arn
+          Identity:
+            # Must specify at least one of Headers, QueryStrings, StageVariables, or Context
+            Headers:
+              - Authorization
+            #        QueryStrings: # OPTIONAL
+            #          - Authorization2
+            ReauthorizeEvery: 0 # OPTIONAL; Service Default: 300
 
 Resources:
   RetrieveJokeStateMachine:
@@ -23,12 +37,56 @@ Resources:
       DefinitionSubstitutions:
         RetrieveJokeFunctionArn: !GetAtt RetrieveJokeFunction.Arn
         DDBPutJokesJob: !Sub arn:${AWS::Partition}:states:::dynamodb:putItem
+        DDBUpdateJokesJob: !Sub arn:${AWS::Partition}:states:::dynamodb:updateItem
         DDBTable: !Ref JokesJobTable
       Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
         - LambdaInvokePolicy:
             FunctionName: !Ref RetrieveJokeFunction
         - DynamoDBWritePolicy:
             TableName: !Ref JokesJobTable
+
+  AuthTokenSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: JokeAppAuthSecret
+      Description: The secret used for the authorization token
+      SecretString:
+        Update value in management console
+
+  JokeFunctionApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Name: "Joke-Function-Api"
+      OpenApiVersion: "3.0.1"
+
+  JokeApplicationApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Name: "Joke-Application-Api"
+
+  JokeApiApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Name: "Joke-Api-Api"
+
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function-authorizer
+      Handler: de.roamingthings.jokes.fn.authorizer.AuthorizationHandler
+      Description: Custom Authorizer Function of the application
+      Environment:
+        Variables:
+          MICRONAUT_ENVIRONMENTS: aws,function
+          POWERTOOLS_SERVICE_NAME: AuthorizerFunction
+          SECRET_ID: JokeAppAuthSecret
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn:
+              Ref: AuthTokenSecret
 
   # Functions implemented as single micronaut functions
   CreateJobFunction:
@@ -52,6 +110,8 @@ Resources:
           Properties:
             Path: /jobs
             Method: post
+            RestApiId:
+              Ref: JokeFunctionApi
 
   JobStatusFunction:
     Type: AWS::Serverless::Function
@@ -73,6 +133,8 @@ Resources:
           Properties:
             Path: /jobs/{jobId+}
             Method: get
+            RestApiId:
+              Ref: JokeFunctionApi
 
   RetrieveJokeFunction:
     Type: AWS::Serverless::Function
@@ -104,8 +166,10 @@ Resources:
         CreateJob:
           Type: Api
           Properties:
-            Path: /app/jobs
+            Path: /jobs
             Method: post
+            RestApiId:
+              Ref: JokeApplicationApi
 
   JobStatusAppFunction:
     Type: AWS::Serverless::Function
@@ -125,10 +189,11 @@ Resources:
         JobStatus:
           Type: Api
           Properties:
-            Path: /app/jobs/{jobId+}
+            Path: /jobs/{jobId+}
             Method: get
+            RestApiId:
+              Ref: JokeApplicationApi
 
-  # Function implemented as monolith micronaut applications
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -150,13 +215,17 @@ Resources:
         JobStatusApiApp:
           Type: Api
           Properties:
-            Path: /api/jobs/{jobId+}
+            Path: /jobs/{jobId+}
             Method: get
+            RestApiId:
+              Ref: JokeApiApi
         CreateJobApiApp:
           Type: Api
           Properties:
-            Path: /api/jobs
+            Path: /jobs
             Method: post
+            RestApiId:
+              Ref: JokeApiApi
 
   JokesJobTable:
     Type: AWS::Serverless::SimpleTable # More info about SimpleTable Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-simpletable.html
@@ -169,27 +238,12 @@ Resources:
         WriteCapacityUnits: 1
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   CreateJobApi:
-    Description: "API Gateway endpoint URL for Prod stage for Create Job function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/jobs"
+    Description: "API Gateway endpoint URL for Prod stage for Create Job function (Authorization Header is required)"
+    Value: !Sub "https://${JokeFunctionApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/jobs"
   CreateJobAppApi:
-    Description: "API Gateway endpoint URL for Prod stage for Create Job function (implemented as app)"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/app/jobs"
+    Description: "API Gateway endpoint URL for Prod stage for Create Job function (implemented as app) (Authorization Header is required)"
+    Value: !Sub "https://${JokeApplicationApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/jobs"
   CreateJobApiApi:
-    Description: "API Gateway endpoint URL for Prod stage for Create Job function (implemented as monolith app)"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/jobs"
-  CreateJobFunction:
-    Description: "Create Job Lambda Function ARN"
-    Value: !GetAtt CreateJobFunction.Arn
-  CreateJobIamRole:
-    Description: "Implicit IAM Role created for Create Job function"
-    Value: !GetAtt CreateJobFunctionRole.Arn
-  RetrieveJokeStateMachineArn:
-    Description: "Retrieve Joke state machine ARN"
-    Value: !Ref RetrieveJokeStateMachine
-  RetrieveJokeStateMachineRole:
-    Description: "IAM Role created for Retrieve Joke state machine based on the specified SAM Policy Templates"
-    Value: !GetAtt RetrieveJokeStateMachine.Arn
+    Description: "API Gateway endpoint URL for Prod stage for Create Job function (implemented as monolith app) (Authorization Header is required)"
+    Value: !Sub "https://${JokeApiApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/jobs"

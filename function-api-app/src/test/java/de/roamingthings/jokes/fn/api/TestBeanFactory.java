@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.sfn.SfnClient;
 
 import javax.inject.Singleton;
+import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Mockito.mock;
 
@@ -33,5 +34,12 @@ public class TestBeanFactory {
     @Primary
     DynamoDbClient dynamoDbClient() {
         return mock(DynamoDbClient.class);
+    }
+
+    @Bean
+    @Singleton
+    @Primary
+    SecurityContext securityContext() {
+        return mock(SecurityContext.class);
     }
 }
